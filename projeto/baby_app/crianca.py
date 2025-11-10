@@ -19,7 +19,10 @@ class Crianca:
         self.nomeMae = nomeMae
     
     def set_foto_entregue(self, status):
-        self.foto_entregue = status    
+        self.foto_entregue = status  
+        
+    def set_Sexo(self):
+        self.sexo = sex      
     
     def get_nome(self):
        return self.nome
@@ -43,9 +46,9 @@ class Crianca:
             
         return idade
     '''=========================================================='''
-    '''ABAIXO TENHO A ENTRADA DE DADOS PELO TECLADO'''
+    '''ABAIXO TENHO A ENTRADA DE crianca PELO TECLADO'''
 
-# CORREÇÃO NA ENTRADA DE DADOS
+# CORREÇÃO NA ENTRADA DE crianca
 nome = input("Digite o nome da criança: ").upper()
 ano = int(input("Digite o ano de nascimento: "))
 mes = int(input("Digite o mês de nascimento: "))
@@ -56,29 +59,29 @@ pai = input("nome do pai:").upper()
 foto = input("A foto foi entregue?").upper()
 
 '''======================================================'''
-'''ABAIXO TENHO A CRIAÇÃO DO OBJETO DADOS'''
+'''ABAIXO TENHO A CRIAÇÃO DO OBJETO crianca'''
 
 # Criar objeto date corretamente
 data_nasc = date(ano, mes, dia)
-dados = Crianca(nome, data_nasc, sex, mae, pai)
+crianca = Crianca(nome, data_nasc, sex, mae, pai)
 
 '''========================================================'''
 '''ABAIXO ESTOU VERIFICANDO O STATUS DA ENTREGA DA FOTO'''
 if foto == "S":
-    dados.set_foto_entregue(True)
+    crianca.set_foto_entregue(True)
 else:
-    dados.set_foto_entregue(False)
+    crianca.set_foto_entregue(False)
 
 '''=========================================================='''
-'''ABAIXO ESTOU IMPRIMINDO OS DADOS NA TELA'''
+'''ABAIXO ESTOU IMPRIMINDO OS crianca NA TELA'''
 print("========RESULTADO==============")
 print("===============================")
-print(f"Nome da criança: {dados.nome}")
-print(f"Data de nascimento: {dados.data_nascimento}")
-print(f"Nome do pai: {dados.nomePai}")
-print(f"Nome da mãe: {dados.nomeMae}")
-print(f"Idade calculada: {dados.CalcularIdade()} anos")
-print(f"Status da foto: {dados.get_Status_foto()}")
+print(f"Nome da criança: {crianca.nome}")
+print(f"Data de nascimento: {crianca.data_nascimento}")
+print(f"Nome do pai: {crianca.nomePai}")
+print(f"Nome da mãe: {crianca.nomeMae}")
+print(f"Idade calculada: {crianca.CalcularIdade()} anos")
+print(f"Status da foto: {crianca.get_Status_foto()}")
 print("===============================")
 
 

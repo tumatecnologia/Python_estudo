@@ -1,0 +1,1 @@
+print(f"Classificação:\033[91m {medicao.get_Classificacao()}\033[0m")
