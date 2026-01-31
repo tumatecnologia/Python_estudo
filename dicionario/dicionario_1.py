@@ -1,29 +1,40 @@
 import itertools
 
-def gerador_inteligente(nomes, datas, simbolos, arquivo_saida):
+def transformar_palavras(lista):
+    """Gera variações de maiúsculas/minúsculas para cada palavra."""
+    variacoes = set()
+    for p in lista:
+        variacoes.add(p.lower())      # casa
+        variacoes.add(p.upper())      # CASA
+        variacoes.add(p.capitalize()) # Casa
+    return list(variacoes)
+
+def gerador_avancado(nomes, datas, simbolos, arquivo_saida):
     total_gerado = 0
+    
+    # Aplicando as variações de letras nos nomes
+    nomes_expandidos = transformar_palavras(nomes)
+    
     with open(arquivo_saida, 'w') as f:
-        # Criamos uma lista de todas as partes
-        # Você pode adicionar ou remover listas aqui
-        componentes = [nomes, datas, simbolos]
+        # Definimos os blocos que serão combinados
+        componentes = [nomes_expandidos, datas, simbolos]
         
-        # O 'permutations' decide a ordem dos blocos (ex: Nome+Data ou Data+Nome)
+        # itertools.permutations define a ordem dos blocos (ex: Nome+Data+Simbolo)
         for ordem in itertools.permutations(componentes):
-            # O 'product' combina os itens dentro de cada bloco na ordem escolhida
+            # itertools.product faz a mistura dos itens dentro dos blocos
             for combinacao in itertools.product(*ordem):
                 senha = "".join(combinacao)
                 f.write(senha + "\n")
                 total_gerado += 1
                 
-    print(f"Pronto! {total_gerado} combinações salvas em: {arquivo_saida}")
+    print(f"--- Concluído ---")
+    print(f"Total de combinações geradas: {total_gerado}")
+    print(f"Arquivo salvo como: {arquivo_saida}")
 
-# --- DEFINA SUAS PALAVRAS-CHAVE AQUI ---
-lista_nomes = ["Admin", "Wifi", "Casa", "Net"] # Podem ser nomes próprios também
-lista_datas = ["2023", "2024", "123"]         # Anos ou sequências comuns
-lista_simbolos = ["@", "!", "#", "$"]         # Símbolos que as pessoas mais usam
+# --- CONFIGURAÇÃO DAS SUAS PALAVRAS-CHAVE ---
+lista_nomes = ["wifi", "conexao", "familia"] 
+lista_datas = ["2023", "2024", "2025", "1020"]
+lista_simbolos = ["@", "!", "#", "$", "*"]
 
-# Nome do arquivo que vamos baixar depois para o Kali
-saida = "wordlist_personalizada.txt"
-
-# Executar
-gerador_inteligente(lista_nomes, lista_datas, lista_simbolos, saida)
+# Execução
+gerador_avancado(lista_nomes, lista_datas, lista_simbolos, "wordlist_v2.txt")
