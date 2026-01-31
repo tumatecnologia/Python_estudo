@@ -2,57 +2,56 @@ import itertools
 from datetime import datetime
 
 def transformar_palavras(lista):
+    """Gera variações de maiúsculas/minúsculas."""
     variacoes = set()
     for p in lista:
-        variacoes.add(p.lower())
-        variacoes.add(p.upper())
-        variacoes.add(p.capitalize())
+        p = p.strip()
+        if p:
+            variacoes.add(p.lower())
+            variacoes.add(p.upper())
+            variacoes.add(p.capitalize())
     return list(variacoes)
 
-def gerar_todos_os_anos():
-    ano_atual = datetime.now().year
-    return [str(ano) for ano in range(1900, ano_atual + 1)]
+def gerar_anos():
+    return [str(ano) for ano in range(1900, datetime.now().year + 1)]
 
-def gerador_v4_filtrado(nomes, simbolos, arquivo_saida):
-    total_bruto = 0
+def gerador_repositorio(alvos, sufixos, simbolos, arquivo_saida):
     total_filtrado = 0
     
-    nomes_expandidos = transformar_palavras(nomes)
-    anos = gerar_todos_os_anos()
-    sequencias_comuns = ["123", "1234", "123456", "00", "112233"]
+    # Expandir todas as palavras-base (Nomes, Cidades, Pets)
+    bases_expandidas = transformar_palavras(alvos)
+    anos = gerar_anos()
+    sequencias = ["123", "1234", "123456", "00", "112233"]
     
-    complementos = list(set(anos + sequencias_comuns))
+    # Unificar o que pode vir depois da palavra-base
+    complementos = list(set(anos + sequencias + sufixos))
     
-    print("Processando e filtrando para WPA2 (min 8 caracteres)...")
+    print(f"[*] Gerando dicionário inteligente em: {arquivo_saida}...")
     
     with open(arquivo_saida, 'w') as f:
-        for n in nomes_expandidos:
-            for c in complementos:
-                # Criamos as variações possíveis
-                possibilidades = [
-                    f"{n}{c}",          # Ex: Wifi1990
-                    f"{c}{n}",          # Ex: 1990Wifi
-                    f"{n}@{c}",         # Ex: Wifi@1990
-                    f"{n}!{c}",         # Ex: Wifi!1990
-                    f"{n}{c}!",         # Ex: Wifi1990!
-                    f"@{n}{c}"          # Ex: @Wifi1990
+        for base in bases_expandidas:
+            for comp in complementos:
+                # Criar variações de estrutura
+                templates = [
+                    f"{base}{comp}",       # Ex: Mara1995
+                    f"{base}@{comp}",      # Ex: Mara@1995
+                    f"{base}{comp}!",      # Ex: Mara1995!
+                    f"{comp}{base}",       # Ex: 1995Mara
+                    f"{base}{comp}{base}"  # Ex: 123Mara123
                 ]
                 
-                for senha in possibilidades:
-                    total_bruto += 1
-                    # --- O FILTRO MÁGICO ---
+                for senha in templates:
+                    # Filtro obrigatório para WPA2 (8 a 63 caracteres)
                     if 8 <= len(senha) <= 63:
                         f.write(senha + "\n")
                         total_filtrado += 1
-                
-    print(f"--- Relatório Final ---")
-    print(f"Combinações ignoradas (curtas demais): {total_bruto - total_filtrado}")
-    print(f"Combinações válidas salvas: {total_filtrado}")
-    print(f"Arquivo pronto: {arquivo_saida}")
+                        
+    print(f"[+] Sucesso! {total_filtrado} senhas válidas geradas.")
 
-# --- CONFIGURAÇÃO ---
-meus_nomes = ["wifi", "conexao", "casa", "familia"]
-meus_simbolos = ["@", "!", "#"]
+# --- EDITE ESTAS LISTAS NO SEU VS CODE ---
+palavras_alvo = ["familia", "beto", "rex", "sp"] # Nomes, pets, cidades
+sufixos_extras = ["2024", "777", "1010"]          # Números da sorte, etc
+meus_simbolos = ["@", "!", "#", "$"]
 
 # Executar
-gerador_v4_filtrado(meus_nomes, meus_simbolos, "wordlist_final_wpa2.txt")
+gerador_repositorio(palavras_alvo, sufixos_extras, meus_simbolos, "wordlist_final.txt")
