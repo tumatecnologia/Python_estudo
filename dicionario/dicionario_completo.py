@@ -2,90 +2,56 @@ import itertools
 from datetime import datetime
 
 def transformar_palavras(lista):
-    """Gera variações de maiúsculas, minúsculas e Leet Speak avançado."""
     variacoes = set()
     leet_map = {'a': '4', 'e': '3', 'i': '1', 'o': '0', 's': '5', 't': '7'}
-
     for p in lista:
         p = p.strip().lower()
         if not p: continue
-        
-        variacoes.add(p)
-        variacoes.add(p.upper())
-        variacoes.add(p.capitalize())
-        
-        # Leet Speak
+        variacoes.update([p, p.upper(), p.capitalize()])
         p_leet = "".join(leet_map.get(c, c) for c in p)
-        variacoes.add(p_leet)
-        variacoes.add(p_leet.capitalize())
-        
+        variacoes.update([p_leet, p_leet.upper(), p_leet.capitalize()])
     return list(variacoes)
 
-def gerar_anos():
-    anos = []
-    ano_atual = datetime.now().year
-    for ano in range(1960, ano_atual + 2):
-        s = str(ano)
-        anos.extend([s, s[-2:]]) # 1995 e 95
-    return list(set(anos))
-
-def gerador_v4(alvos, sufixos, simbolos, arquivo_saida):
-    total = 0
-    senhas_unicas = set()
+def gerador_bruto_v5(alvos, arquivo_saida):
+    print(f"[*] Iniciando geração massiva. Isso pode levar um tempo...")
     
-    bases = transformar_palavras(alvos)
-    anos = gerar_anos()
-    
-    # 1. GERAR SEQUÊNCIAS DE 8 DÍGITOS (Muito comum: datas ou números seguidos)
-    # Nota: Geramos apenas as mais prováveis para não inflar o arquivo demais
-    sequencias_8 = [
-        "12345678", "87654321", "00000000", "11111111", 
-        "10203040", "12121212", "12312312"
-    ]
-    
-    # 2. COMBINAÇÕES DE 3 LETRAS (O "abecedário" como prefixo/sufixo)
-    # Ex: abc, aaa, wifi, net...
-    letras_comuns = ["abc", "wifi", "net", "web", "sky"]
-    
-    complementos = list(set(anos + sufixos + sequencias_8 + letras_comuns))
-    
-    print(f"[*] Gerando dicionário v4 (Inteligente + Numérico)...")
-
-    for base in bases:
-        # Palavra pura
-        if 8 <= len(base) <= 63: senhas_unicas.add(base)
-        
-        for comp in complementos:
-            for simb in simbolos:
-                templates = [
-                    f"{base}{comp}",       # familia2024
-                    f"{base}{simb}{comp}",    # familia@2024
-                    f"{comp}{base}",       # 2024familia
-                    f"{base}{comp}{simb}",    # familia2024!
-                    f"{base}_{comp}",      # familia_2024
-                    f"{base}{simb}"        # familia@
-                ]
-                for s in templates:
-                    if 8 <= len(s) <= 63:
-                        senhas_unicas.add(s)
-
-    # 3. DATAS DDMMAAAA (As mais comuns dos últimos 40 anos)
-    for ano in range(1970, 2025):
-        senhas_unicas.add(f"0101{ano}") # Exemplo de feriado/data padrão
-
+    # Usamos o arquivo direto para não estourar a memória RAM
     with open(arquivo_saida, 'w') as f:
-        for s in sorted(senhas_unicas):
-            f.write(s + "\n")
-            total += 1
-                        
-    print(f"[+] Finalizado! {total} senhas geradas em {arquivo_saida}")
+        
+        # 1. TODAS AS COMBINAÇÕES NUMÉRICAS DE 8 DÍGITOS (00000000 a 99999999)
+        # Isso sozinho gera 100 milhões de senhas. É o "padrão ouro" para redes brasileiras.
+        print("[>] Gerando 100 milhões de combinações numéricas (8 dígitos)...")
+        for i in range(100000000):
+            f.write(f"{i:08d}\n")
+        
+        # 2. VARIAÇÕES DAS PALAVRAS-ALVO COM SUFIXOS
+        print("[>] Gerando variações das palavras-base...")
+        bases = transformar_palavras(alvos)
+        anos = [str(ano) for ano in range(1950, 2027)] + [str(ano)[-2:] for ano in range(1950, 2027)]
+        simbolos = ["", "@", "!", "#", "$", "*", "_", "."]
+        sequencias = ["123", "1234", "123456", "102030"]
 
-# --- LISTA AMPLIADA ---
-palavras_base = [
-    "familia", "filhos", "mesh", "beto", "rex", "casa", 
-    "deus", "amor", "senha", "admin", "conect", "wifi"
-]
-sufixos = ["123", "777", "1010", "2024", "2025", "2026"]
-simbolos = ["@", "!", "#", "$", "*"]
+        for base in bases:
+            for s in simbolos:
+                for comp in (anos + sequencias):
+                    senha1 = f"{base}{s}{comp}"
+                    senha2 = f"{comp}{s}{base}"
+                    if 8 <= len(senha1) <= 63: f.write(senha1 + "\n")
+                    if 8 <= len(senha2) <= 63: f.write(senha2 + "\n")
 
-gerador_v4(palavras_base, sufixos, simbolos, "wordlist_completo.txt")
+        # 3. O "ABECEDÁRIO" (Combinações de 3 letras + números)
+        # Tentar todas as letras do alfabeto de 8 chars é impossível, 
+        # então focamos em prefixos de letras com sufixos numéricos.
+        print("[>] Gerando combinações de iniciais + números...")
+        alfabeto = "abcdefghijklmnopqrstuvwxyz"
+        # Gera combinações como abc12345, aaa12345, etc.
+        for combo in itertools.product(alfabeto, repeat=3):
+            prefixo = "".join(combo)
+            for suf in ["123", "1234", "2024", "2025"]:
+                f.write(f"{prefixo}{suf}\n")
+
+    print(f"[+] Sucesso! O arquivo {arquivo_saida} está pronto para o combate.")
+
+# --- CONFIGURAÇÃO ---
+palavras_base = ["familia", "filhos", "mesh", "beto", "rex", "casa", "wifi"]
+gerador_bruto_v5(palavras_base, "wordlist_mega_brute.txt")
